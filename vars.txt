@@ -1,0 +1,443 @@
+;---------------Jimmy Variables for Game functions and command parsing------------
+;working are tom.bin,chick.bin,and2
+GateWidth EQU 30;;xor 200x100; chick 246;and2 276; tom 230  
+GateHeight EQU 26;chick 200;;and2 135;tom 200
+AndGateFileName DB 'AND.bin', 0 ; tom1 
+OrGateFileName DB 'OR.bin',0
+NandGateFileName DB 'NAND.bin',0
+NorGateFileName DB 'NOR.bin',0
+XorGateFileName DB 'XOR.bin',0
+XnorGateFileName DB 'XNOR.bin',0
+WhiteSpaceFileName DB 'WHITESCREEN.bin',0
+GateFilehandle DW ? 
+GateData DB GateWidth*GateHeight dup (0)
+HorizontalDimension DW 0
+VerticalDimension DW 0
+SCOL DW 0 ; starting column
+SROW DW 0
+;---------------------KEYBOARD VARIABLES---------------------------- 
+F1scancode equ 3Eh ; this is actually F4 scancode as we are using F4 in place of F1
+F2scancode equ 3Ch
+F3scancode equ 3Dh
+Escscancode equ 1h
+Bckspacescancode equ 0Eh
+Enterscancode EQU 1Ch
+mes1 db 'To start chatting press F1$',0
+mes2 db 'To start the game press F2$'
+mes3 db 'To end the program press ESC$'
+mes4 db 'To end chatting, press F3$'
+mes5 db 50h dup('-'), '$'
+mes6 db 'Here starts the game$'
+border    db    "-----------------------------------------------------------------------------------$"
+Line	  db    "-----------------------------------------------------------------------------------$"
+;-------------------------------COMMAND RECEIVING AND PARSING VARIABLES------------------------------
+VALID_DIGIT DB 0 
+VALID_COMMAND DB 0
+command_available db 'A','O','D','R','X','N','W','M','C','a','o','d','r','x','n','w','m','c'  
+digit              db '1','2','3','4','5','6','7','8','9'
+Received_Command db 9 dup('$')
+;Received_Command db 9 dup('$)
+Store_Command db 9 dup('$')
+;Store_Command db "kkkkkkk%$"
+ESCWASPRESSED DB 0
+holdmem db "aliahmed$"
+
+
+MYCOMMAND DB 9 DUP('$')
+HISCOMMAND DB 9 DUP('$')
+myBufferCount db 0
+hisBufferCount db 0
+CHAR_BUFFER DB 0
+SCAN_BUFFER DB 0
+
+SendChatInvitationMSg DB "You've sent a chat invitation$"
+SendGameInvitationMsg DB "You've sent a game invitation$"
+AcceptChatInvitationMSg DB "Press F4 to accept the chat invitation$"
+AcceptGameInvitationMSg DB "PRESS F2 TO ACCEPT THE GAME INVITATION$"
+YourWaitingHimToAcceptMsg DB "I'm waiting for you to accept$"
+IamHost db 0
+IamChatHost db 0
+IenteredNameFirst db 0
+;YourWaitingHimToAcceptMsg db "press F2 TO ACCEPT$" ; 3AYZA TT3DL 
+SenderGameChatInvite DB "You've sent your friend a game chat"
+ReceiverGameChatInvite DB "You're invited to a game chat! Press F10 to accept$"
+WaitforLevelMsg DB "Waiting for host to determine level$"
+TESTSTR1 DB "TESTSTR1$"
+TESTSTR2 DB "TESTSTR2$"
+TESTSTR3 DB "TESTSTR3$"
+
+
+
+Whitespaces db 239 dup(" "),'$'
+p1_nametag db "Player 1: ",'$'
+p2_nametag db "Player 2: ",'$'
+IY DB 28D
+IX DB 0D
+OX DB 39D
+OY DB 28D
+VLine db '#'
+
+;-------------------------------Mode VARIABLES------------------------------
+CurMode DB 0 ; 1 Chatting Mode, 2 Game Mode
+THEVERYFIRSTGAME DB 1
+;GARBAGE DB "499IFO98T1sfcvs9i9r8943-0o0mxj93094oksus1033$^^ks80o490i4390309m-=mxn9"
+;-------------------------------Gaming VARIABLES------------------------------
+; first 10 values will be randomized
+LogicValue DB 1,0,1,0,1,1,0,1,0,1
+          DB 'U','U','U','U','U','U','U','U','U','U'
+          DB 'U','U','U','U','U','U','U','U','U','U'
+          DB 'U','U','U','U','U','U','U','U','U','U'
+          DB 'U','U','U','U','U','U','U','U','U','U'
+          DB 'U','U','U','U','U','U','U','U','U','U'
+          DB 'U','U','U','U','U','U','U','U','U','U'
+          DB 'U','U','U','U','U','U','U','U','U','U'
+          DB 'U','U','U','U','U','U','U','U','U','U'
+          DB 'U','U','U','U','U','U','U','U','U','U'
+SpotOccupied DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0          
+             DB 0,0,0,0,0,0,0,0,0,0          
+             DB 0,0,0,0,0,0,0,0,0,0          
+             DB 0,0,0,0,0,0,0,0,0,0          
+             DB 0,0,0,0,0,0,0,0,0,0          
+             DB 0,0,0,0,0,0,0,0,0,0          
+             DB 0,0,0,0,0,0,0,0,0,0          
+             DB 0,0,0,0,0,0,0,0,0,0   
+
+ip1ColIndex     DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0 
+             DB 0,0,0,0,0,0,0,0,0,0 
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+
+ip1RowIndex     DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0 
+             DB 0,0,0,0,0,0,0,0,0,0 
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+
+ip2ColIndex     DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0 
+             DB 0,0,0,0,0,0,0,0,0,0 
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+
+ip2RowIndex     DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0 
+             DB 0,0,0,0,0,0,0,0,0,0 
+             DB 0,0,0,0,0,0,0,0,0,0
+             DB 0,0,0,0,0,0,0,0,0,0
+
+Operation    DB ?,?,?,?,?,?,?,?,?,?
+             DB ?,?,?,?,?,?,?,?,?,?
+             DB ?,?,?,?,?,?,?,?,?,?
+             DB ?,?,?,?,?,?,?,?,?,?
+             DB ?,?,?,?,?,?,?,?,?,?
+             DB ?,?,?,?,?,?,?,?,?,?
+             DB ?,?,?,?,?,?,?,?,?,?
+             DB ?,?,?,?,?,?,?,?,?,?
+             DB ?,?,?,?,?,?,?,?,?,?
+             DB ?,?,?,?,?,?,?,?,?,?
+SpotTaken DB 0
+SpotIsOccupied DB 0                    
+COPYSTRING_SIZE DB 0
+LOOKUPCOL DB 0
+LOOKUPROW DB 0
+LOOKUPVALUE DB 0
+; ORDER OF DEFINITIONS IS VERY IMPORTANT for the following 
+ip1_col db 0
+ip1_row db 0
+ip2_col db 0
+ip2_row db 0
+op_col db 0
+op_row db 0
+INPUT1VALUE DB 'U'
+INPUT2VALUE DB 'U'
+OUTPUTVALUE DB 'U'
+TEN EQU 10D
+OPERATIONTYPE DB 0
+ TEMPVW1 DW 0
+  TEMPVW2 DW 0
+ApprovedCommand DB 0
+
+XNOTE DW 0
+YNOTE DW 0
+Draw_Square_Width DW 0
+Draw_Square_Height DW 0
+Draw_Square_Color DB 0  
+; for RedrawNode Proc
+NodeColor DB ?
+;UpdateAllNodes procedure variables
+Src1Value db ?
+Src2Value db ?
+TrgtNodeValue db ?
+Operation_Was db ?
+firgame db 0
+
+PLAYER1HASAROW DB 0
+;------------------------------------------StatusBar variables------------------------------------
+ValidCommandmsg db "Please Enter a valid command$"
+ValidNodesmsg db "Please Enter valid node values$"
+largespacemsg db "                                                                           $"
+YOUCANFLUSHMSG DB "Remember, to flush the command buffer at any time press F$"
+bufferFlushmsg db "To flush the command buffer, press F$0",0
+SpotNotAvlblMsg db "There is already a gate in this spot!! Pick another one! $"
+CNTRMVSTR DB "No gate to remove!$"
+SuccessfulRmvl db "Successfully removed!$"
+INVLD_CMD_MSG DB "Command was invalid! Please enter a valid command.$"
+clearstatusbar db 0
+NotFirstGame db 0
+StrNewGame db "Press F5 to start a new game$"
+NewGame db 0h
+PLayingwithmsg db "You're playing with $"
+;----------------cursor positions
+curR db 0
+curC db 0
+;-----------New Namescreen variables
+myname db 17 dup('$'),0
+hisname db 17 dup('$'),0
+
+
+;---------------------------level messages and variables------------------------------------
+PickLevelMsg db "Pick the level you want: 1 or 2$"
+CHOSENLEVEL DB 0
+GAMEENDED DB 0
+midgame DB 0
+SECONDS DB 99
+DELAY DB 5
+INVALIDWCOMMAND DB 0
+PLAYER1WIN DB 0
+PLAYER2WIN DB 0
+SUMFIRST5 DB 0
+SUMLAST5 DB 0
+;----------------------------------------Serial Data Variables------------------------------------
+SendTemp db 9 dup('$')
+RecTemp db 9 dup('$')
+DSIZE DB 0
+Data_Ptr DB 0
+;;
+;------screen navigation variables
+ExitToMainScreen db 0
+SPstore dw 0
+Restoral db 0
+;---------------------------------------------
+;--------chatting variables----
+Hsend db ?
+Hsend2 db ?
+Xsend db ?
+Yrecieve db ?
+Char_Send    DB   ? 
+Char_Recieve DB   ? 
+Exit_Chat    DB   0
+firs_half   dw 0300h
+sec_half    dw 0d00h
+
+space db ' : $'
+;-------------Names Variables------------
+presstocontinuemes db 'Press Enter key to continue$'
+enternamemes db "Enter your name:$"
+p2name db 16 dup('$')
+p1name db 16 dup('$')
+p1nameactualsize db 0
+p2nameactualsize db 0
+;------------------------------------------------------
+
+
+
+;------------------------------------GAMESCREEN Variables------------------------------------
+ScreenWidth EQU 640
+ScreenHeight EQU 334
+Guideline DB 'A:AND O:OR D:NAND R:NOR X:XOR N:XNOR'    
+Numbersfrom0to9 DB '0 1 2 3 4 5 6 7 8 9' 
+ColNum  DW 241D
+RowNum DW 25D
+numOFCol DW 10
+ArrDimensionsOfCol         DW  70,70+59,70+59*2,70+59*3,70+59*4,70+59*5,70+59*6,70+59*7,70+59*8,70+59*9
+
+
+         timers  label byte
+
+            timer_1                  db      0,0,0,1,1,0,0,0
+                                    db      1,1,1,1,1,0,0,0
+                                    db      0,0,0,1,1,0,0,0
+                                    db      0,0,0,1,1,0,0,0
+                                    db      0,0,0,1,1,0,0,0
+                                    db      0,0,0,1,1,0,0,0
+                                    db      0,0,0,1,1,0,0,0
+                                    db      0,0,0,1,1,0,0,0
+                                    db      0,1,1,1,1,1,1,0
+            
+                                
+
+            timer_2                  db     1,1,1,1,1,1,1,1
+                                    db     1,1,1,1,1,1,1,1
+                                    db     0,0,0,0,0,0,0,1
+                                    db     0,0,0,0,0,0,0,1
+                                    db     1,1,1,1,1,1,1,1
+                                    db     1,1,0,0,0,0,0,0
+                                    db     1,1,0,0,0,0,0,0
+                                    db     1,1,1,1,1,1,1,1
+                                    db     1,1,1,1,1,1,1,1
+
+            timer_3                  db      1,1,1,1,1,1,1,1
+                                    db      1,1,1,1,1,1,1,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      1,1,1,1,1,1,1,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      1,1,1,1,1,1,1,1
+                                    db      1,1,1,1,1,1,1,1
+            
+            timer_4                  db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,1,1,1,1,1,1,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+
+            timer_5                  db      1,1,1,1,1,1,1,1
+                                    db      1,1,1,1,1,1,1,1
+                                    db      1,0,0,0,0,0,0,0
+                                    db      1,0,0,0,0,0,0,0
+                                    db      1,1,1,1,1,1,1,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      1,1,1,1,1,1,1,1
+                                    db      1,1,1,1,1,1,1,1
+
+            timer_6                  db      1,1,1,1,1,1,1,1
+                                    db      1,0,0,0,0,0,0,0
+                                    db      1,0,0,0,0,0,0,0
+                                    db      1,0,0,0,0,0,0,0
+                                    db      1,1,1,1,1,1,1,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,1,1,1,1,1,1,1
+
+            timer_7                  db      1,1,1,1,1,1,1,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+
+            timer_8                  db      1,1,1,1,1,1,1,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,1,1,1,1,1,1,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,1,1,1,1,1,1,1
+
+            timer_9                  db      1,1,1,1,1,1,1,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,1,1,1,1,1,1,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      0,0,0,0,0,0,0,1
+                                    db      1,1,1,1,1,1,1,1                          
+
+            timer_0                  db      0,0,1,1,1,1,0,0
+                                    db      0,1,0,0,0,0,1,0
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      1,0,0,0,0,0,0,1
+                                    db      0,1,0,0,0,0,1,0
+                                    db      0,0,1,1,1,1,0,0
+        VarToCompare dw 0
+    ;end related to main screen game
+
+  mes db 'enter  a number: ','$'
+  firstnumber db '$','$','$','$'
+  ROW DB 0
+  COL DB 0
+  VAR6 DB 'AC','$'
+  VAR7 DB 53 DUP('$') 
+  STRING2 DB 'AC','$'
+  CHAR DB 5 DUP('$')    
+  bool db 0  
+  FIRST DB 30H
+  SECOND DB 30H 
+  EQUAL DB 'EQUAL','$' 
+  W dw 10 dup(0) 
+  first2 db 45,0,9,'$'
+  GameScr_LogicValue db ?
+
+
+  ;;;;-----------GENERAL UNSAFE VARIABLES FOR PROCEDURES'S USE------------------
+  V1 DB 0
+  V2 DB 0
+  vw dw 0 
+  var1 db 0
+  ;;changed to db today 6/4/2023 
+  PRINTTXT DB 0 
+  colorbool db 0
+VR1 DB 0
+VR2 DB 0
+VR3 DB 0  
+CNTR DB 0
+THECOLOR DB 0 
+R DB 0
+;C DB 0
+;;----------------for macros------------
+
+;--------------------for my old macros 
+yf_drawlen db 0
+xf_drawlen db 0
+;--------------------------------
+
+    ;PRINTSTR MACRO
+    X DB 100 DUP('$')
+    Y DB 100 DUP('$')
+
+  ;---------------------------Level Related Variables
+ ;---------------------------Level One------------------------
+Winner1      DB "Player 1 wins$",0
+Winner2      DB "Player 2 wins$",0
+ones         DB 5 dup (1)
+zeroes       DB 5 dup (0)
+
+
+;---------------------------------------------Wiring Variables------------------------------------------
+x1 dw ?
+y1 dw ?
+x2 dw ?
+y2 dw ?
+xnode dw ?
+ynode dw ?
+xfinal dw ?
+yfinal dw ?
